@@ -1,5 +1,6 @@
 package com.example.Authtentication.GlobalException;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.context.config.ConfigDataNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.naming.AuthenticationException;
+import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,4 +35,6 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>("Duplicate key : " +ex.getMessage() ,HttpStatus.BAD_REQUEST);
     }
+
+
 }

@@ -1,5 +1,7 @@
 package com.example.Authtentication.Config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,12 +16,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
@@ -39,9 +42,23 @@ public class SecurityConfiguration {
                         .requestMatchers("/dataMahasiswa/**").hasRole("MAHASISWA")// Endpoint untuk autentikasi diizinkan tanpa login
                         .anyRequest().authenticated() // Endpoint lainnya memerlukan autentikasi
                 )
+                // Todo -> Kalau Role nya missmatch
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            Map<String, String> err = new HashMap<>();
+                            err.put("Status" , "403");
+                            err.put("message" , "Role Missmatch");
+                            ObjectMapper objectMapper= new ObjectMapper();
+                            String jsonResponse  =  objectMapper.writeValueAsString(err);
+                            response.getWriter().write(jsonResponse);
+                        })
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless untuk API berbasis JWT
                 )
+
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
